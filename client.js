@@ -63,7 +63,7 @@ class AsyncPool {
 	}
 }
 
-export class NSocket {
+export class LiveJack {
 	constructor({servers, namespace, version}) {
 		if (!servers || servers.length == 0) throw new Error("missing servers");
 		if (typeof servers == "string") servers = servers.split(" ");
@@ -75,6 +75,7 @@ export class NSocket {
 	}
 	async setup(server) {
 		const url = server + '/' + this.namespace;
+		if (!this.rooms) this.rooms = {};
 		return new Promise((resolve) => {
 			let io = this.io;
 			if (!io) {
@@ -88,12 +89,18 @@ export class NSocket {
 				io.on('reconnect_error', async (attempts) => {
 					await this.pool.find((server) => this.setup(server));
 				});
-				io.on('connect', function() {
+				io.on('connect', function () {
 					resolve();
 				});
 				io.on('message', (data) => this.notify(data));
 			} else {
 				io.io.uri = url;
+			}
+		}).then(() => {
+			const olds = this.rooms;
+			this.rooms = {};
+			for (let room in olds) {
+				this.join(room, olds[room]);
 			}
 		});
 	}
@@ -111,16 +118,13 @@ export class NSocket {
 		});
 		await this.setup(server);
 	}
-	join(room, mtime) {
+	join(room, mtime, listener = null) {
 		const joined = room in this.rooms;
 		this.rooms[room] = mtime;
 		if (!joined) this.io.emit('join', { room, mtime });
-	}
-	listen(room, listener) {
-		this.emitter.addEventListener(name, listener, false);
+		if (listener) this.emitter.addEventListener(room, listener, false);
 	}
 	notify(data) {
-		console.log(data.room, data.key);
 		const e = new CustomEvent(data.room, {
 			view: window,
 			bubbles: true,
