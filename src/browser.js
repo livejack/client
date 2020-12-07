@@ -1,3 +1,4 @@
+/* eslint-env browser */
 class ScriptLoader {
 	constructor(url) {
 		this.url = url;
