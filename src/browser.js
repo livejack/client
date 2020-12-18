@@ -126,7 +126,7 @@ export class LiveJack {
 		if (listener) this.emitter.addEventListener(room, listener, false);
 	}
 	notify(data) {
-		const e = new CustomEvent(data.room, {
+		const e = new CustomEvent(data.room || data.key, {
 			view: window,
 			bubbles: true,
 			cancelable: true,

@@ -44,6 +44,10 @@ module.exports = class LiveJack extends EventEmitter {
 	}
 	send(msg) {
 		debug('emit', msg);
+		if (msg.room) {
+			msg.key = msg.room;
+			delete msg.room;
+		}
 		this.socket.emit('message', msg);
 	}
 };
