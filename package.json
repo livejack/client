@@ -19,6 +19,6 @@
     "extends": "@kapouer/eslint-config"
   },
   "dependencies": {
-    "socket.io-client": "2.2.0"
+    "socket.io-client": "2.3.1"
   }
 }
