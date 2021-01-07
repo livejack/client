@@ -48,7 +48,7 @@ class AsyncPool {
 			await action(item);
 		} catch(err) {
 			await this.sleep(1000);
-			await this.some(action);
+			await this.find(action);
 		}
 		return item;
 	}
