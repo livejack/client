@@ -17,15 +17,15 @@ class ScriptLoader {
 		});
 	}
 	handleEvent(e) {
-		switch(e.type) {
-		case "load":
-			this.resolve();
-			break;
-		case "error":
-			this.reject(new Error(`Cannot load ${this.url}`));
-			break;
-		default:
-			return;
+		switch (e.type) {
+			case "load":
+				this.resolve();
+				break;
+			case "error":
+				this.reject(new Error(`Cannot load ${this.url}`));
+				break;
+			default:
+				return;
 		}
 		e.target.removeEventListener('load', this, false);
 		e.target.removeEventListener('error', this, false);
