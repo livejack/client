@@ -26,11 +26,15 @@ module.exports = class LiveJack extends EventEmitter {
 			this.emit('error', e);
 		});
 		socket.on('connect_error', (e) => {
-			console.error(e || "connect_error", socket.io.uri);
+			if (!e) e = "connect error";
+			// eslint-disable-next-line no-console
+			console.error(e.toString(), socket.io.uri);
 			socket.io.uri = this.iouri();
 		});
 		socket.on('reconnect_error', (e) => {
-			console.error(e || "reconnect_error", socket.io.uri);
+			if (!e) e = "reconnect error";
+			// eslint-disable-next-line no-console
+			console.error(e.toString(), socket.io.uri);
 			socket.io.uri = this.iouri();
 		});
 	}
