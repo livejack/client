@@ -74,36 +74,38 @@ export class LiveJack {
 		this.emitter = document.createElement('div');
 		this.pool = new AsyncPool(servers);
 	}
-	async setup(server) {
+	rejoin() {
+		const olds = this.rooms;
+		this.rooms = {};
+		for (let room in olds) {
+			this.join(room, olds[room]);
+		}
+	}
+	setup(server) {
 		const url = server + '/' + this.namespace;
 		if (!this.rooms) this.rooms = {};
-		return new Promise((resolve) => {
-			let io = this.io;
-			if (!io) {
-				io = this.io = window.io(url, {
-					transports: ['websocket'] // try only websocket
-				});
-				io.on('connect_error', async (e) => {
-					io.io.opts.transports = ['polling', 'websocket']; // fallback to polling but keep trying websocket
-					await this.pool.find((server) => this.setup(server));
-				});
-				io.on('reconnect_error', async (attempts) => {
-					await this.pool.find((server) => this.setup(server));
-				});
-				io.on('connect', function () {
-					resolve();
-				});
-				io.on('message', (data) => this.notify(data));
-			} else {
-				io.io.uri = url;
-			}
-		}).then(() => {
-			const olds = this.rooms;
-			this.rooms = {};
-			for (let room in olds) {
-				this.join(room, olds[room]);
-			}
-		});
+		let io = this.io;
+		if (!io) {
+			io = this.io = window.io(url, {
+				transports: ['websocket'] // try only websocket
+			});
+			io.on('connect_error', (e) => {
+				io.io.opts.transports = ['polling', 'websocket']; // fallback to polling but keep trying websocket
+				this.pool.find((server) => this.setup(server));
+			});
+			io.on('reconnect_error', (attempts) => {
+				this.pool.find((server) => this.setup(server));
+			});
+			io.on('reconnect', () => {
+				this.rejoin();
+			});
+			io.on('connect', () => {
+				this.rejoin();
+			});
+			io.on('message', (data) => this.notify(data));
+		} else {
+			io.io.uri = url;
+		}
 	}
 	async init() {
 		const server = await this.pool.find(async (url) => {
@@ -117,7 +119,7 @@ export class LiveJack {
 			await loader.load();
 			if (!window.io) throw new Error("script did not load window.io");
 		});
-		await this.setup(server);
+		this.setup(server);
 	}
 	join(room, mtime, listener = null) {
 		const joined = room in this.rooms;
