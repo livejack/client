@@ -1,6 +1,5 @@
 /* eslint-env node */
 const io = require('socket.io-client');
-const URL = require('url');
 const debug = require('debug')('livejack:client');
 const EventEmitter = require('events');
 
@@ -47,7 +46,6 @@ module.exports = class LiveJack extends EventEmitter {
 	iouri() {
 		const iohost = this.pool[parseInt(Math.random() * this.pool.length)];
 		iohost.pathname = this.namespace;
-		iohost.searchParams = new URLSearchParams();
 		iohost.searchParams.set('token', this.token);
 		return iohost.toString();
 	}
