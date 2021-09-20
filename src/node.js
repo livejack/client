@@ -11,7 +11,8 @@ module.exports = class LiveJack extends EventEmitter {
 			str = str.trim();
 			// if a url without protocol was given, always default to https
 			if (str.substring(0, 2) == "//") str = "https:" + str;
-			return URL.parse(str);
+			const url = new URL(str);
+			return url;
 		});
 		this.namespace = namespace;
 		this.token = token;
@@ -41,10 +42,9 @@ module.exports = class LiveJack extends EventEmitter {
 	iouri() {
 		const iohost = this.pool[parseInt(Math.random() * this.pool.length)];
 		iohost.pathname = this.namespace;
-		iohost.query = {
-			token: this.token
-		};
-		return URL.format(iohost);
+		iohost.searchParams = new URLSearchParams();
+		iohost.searchParams.set('token', this.token);
+		return iohost.toString();
 	}
 	send(msg) {
 		debug('emit', msg);
