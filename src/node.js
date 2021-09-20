@@ -7,16 +7,21 @@ const EventEmitter = require('events');
 module.exports = class LiveJack extends EventEmitter {
 	constructor({ servers, namespace, token }) {
 		super();
+		let locals = true;
 		this.pool = servers.map(function (str) {
 			str = str.trim();
 			// if a url without protocol was given, always default to https
 			if (str.substring(0, 2) == "//") str = "https:" + str;
 			const url = new URL(str);
+			if (url.hostname != "localhost") locals = false;
 			return url;
 		});
 		this.namespace = namespace;
 		this.token = token;
-		const socket = this.socket = io(this.iouri());
+
+		const socket = this.socket = io(this.iouri(), {
+			rejectUnauthorized: !locals
+		});
 		socket.on('message', (msg) => {
 			this.emit('message', msg);
 		});
