@@ -21,14 +21,9 @@ module.exports = class LiveJack extends EventEmitter {
 		const socket = this.socket = io(this.iouri(), {
 			rejectUnauthorized: !locals
 		});
-		socket.on('message', (msg) => {
-			this.emit('message', msg);
-		});
+
 		socket.on('connect', function () {
 			socket.emit('join', { room: '*' });
-		});
-		socket.on('error', (e) => {
-			this.emit('error', e);
 		});
 		socket.on('connect_error', (e) => {
 			if (!e) e = "connect error";
@@ -36,11 +31,11 @@ module.exports = class LiveJack extends EventEmitter {
 			console.error(e.toString(), socket.io.uri);
 			socket.io.uri = this.iouri();
 		});
-		socket.on('reconnect_error', (e) => {
-			if (!e) e = "reconnect error";
-			// eslint-disable-next-line no-console
-			console.error(e.toString(), socket.io.uri);
-			socket.io.uri = this.iouri();
+		socket.on('message', (msg) => {
+			this.emit('message', msg);
+		});
+		socket.on('error', (e) => {
+			this.emit('error', e);
 		});
 	}
 	iouri() {

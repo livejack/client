@@ -74,33 +74,22 @@ export class LiveJack {
 		this.emitter = document.createElement('div');
 		this.pool = new AsyncPool(servers);
 	}
-	rejoin() {
-		const olds = this.rooms;
-		this.rooms = {};
-		for (let room in olds) {
-			this.join(room, olds[room]);
-		}
-	}
 	setup(server) {
 		const url = server + '/' + this.namespace;
 		if (!this.rooms) this.rooms = {};
 		let io = this.io;
 		if (!io) {
 			io = this.io = window.io(url, {
-				transports: ['websocket'] // try only websocket
-			});
-			io.on('connect_error', (e) => {
-				io.io.opts.transports = ['polling', 'websocket']; // fallback to polling but keep trying websocket
-				this.pool.find((server) => this.setup(server));
-			});
-			io.on('reconnect_error', (attempts) => {
-				this.pool.find((server) => this.setup(server));
-			});
-			io.on('reconnect', () => {
-				this.rejoin();
+				// try only websocket
+				transports: ['websocket']
 			});
 			io.on('connect', () => {
-				this.rejoin();
+				this.joinAll();
+			});
+			io.on('connect_error', (e) => {
+				// fallback to polling but keep trying websocket
+				io.io.opts.transports = ['polling', 'websocket'];
+				this.pool.find((server) => this.setup(server));
 			});
 			io.on('message', (data) => this.notify(data));
 		} else {
@@ -122,10 +111,20 @@ export class LiveJack {
 		this.setup(server);
 	}
 	join(room, mtime, listener = null) {
-		const joined = room in this.rooms;
 		this.rooms[room] = mtime;
-		if (!joined) this.io.emit('join', { room, mtime });
-		if (listener) this.emitter.addEventListener(room, listener, false);
+		if (listener) {
+			this.emitter.addEventListener(room, listener, false);
+		}
+		if (this.io.connected) {
+			this.io.emit('join', { room, mtime });
+		} else {
+			// do nothing, joinAll is called upon connect
+		}
+	}
+	joinAll() {
+		for (const [room, mtime] of Object.entries(this.rooms)) {
+			this.join(room, mtime);
+		}
 	}
 	notify(data) {
 		const e = new CustomEvent(data.room || data.key, {
