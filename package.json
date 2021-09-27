@@ -11,7 +11,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
-    "@kapouer/eslint-config": "^1.6.0"
+    "@kapouer/eslint-config": "^1.6.1"
   },
   "author": "Jérémy Lal <kapouer@melix.org>",
   "license": "MIT",
