@@ -27,7 +27,6 @@ module.exports = class LiveJack extends EventEmitter {
 		});
 		socket.on('connect_error', (e) => {
 			if (!e) e = "connect error";
-			// eslint-disable-next-line no-console
 			console.error(e.toString(), socket.io.uri);
 			socket.io.uri = this.iouri();
 		});
