@@ -5,13 +5,13 @@ export default class AsyncPool {
 	}
 	async try(action) {
 		const list = this.list.slice();
-		const old = this.index;
-		if (old != null && list.length > 1) {
+		const old = list.length > 1 ? this.index : -1;
+		if (old >= 0) {
 			list.splice(old, 1);
 		}
 		const cur = parseInt(Math.random() * list.length);
 		const item = list[cur];
-		this.index = (old == null || list.length <= 1 || cur < old) ? cur : (cur + 1);
+		this.index = cur >= old ? cur + 1 : cur;
 		await action(item);
 		return item;
 	}
