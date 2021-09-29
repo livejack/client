@@ -16,7 +16,7 @@ export class LiveJack extends EventTarget {
 		});
 		this.namespace = namespace;
 		this.version = version;
-		this.pool = new AsyncPool(servers);
+		this.pool = new AsyncPool(this.servers);
 		await this.load();
 	}
 	#start(server) {
