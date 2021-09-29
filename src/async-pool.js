@@ -4,12 +4,14 @@ export default class AsyncPool {
 		this.index = null;
 	}
 	async try(action) {
-		const list = this.index != null && this.list.length > 1
-			? this.list.slice().splice(this.index, 1)
-			: this.list;
-		const index = parseInt(Math.random() * list.length);
-		this.index = index;
-		const item = list[index];
+		const list = this.list.slice();
+		const old = this.index;
+		if (old != null && list.length > 1) {
+			list.splice(old, 1);
+		}
+		const cur = parseInt(Math.random() * list.length);
+		const item = list[cur];
+		this.index = (old == null || list.length <= 1 || cur < old) ? cur : (cur + 1);
 		await action(item);
 		return item;
 	}
