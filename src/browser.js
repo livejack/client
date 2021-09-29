@@ -8,7 +8,12 @@ export class LiveJack extends EventTarget {
 	async init({ servers, namespace, version }) {
 		if (!servers || servers.length == 0) throw new Error("missing servers");
 		if (typeof servers == "string") servers = servers.split(" ");
-		this.servers = servers;
+		this.servers = servers.map((url) => {
+			if (url.startsWith('//')) {
+				url = document.location.protocol + url;
+			}
+			return url;
+		});
 		this.namespace = namespace;
 		this.version = version;
 		this.pool = new AsyncPool(servers);
@@ -48,14 +53,9 @@ export class LiveJack extends EventTarget {
 		}
 	}
 	async load() {
+		const query = this.version ? `?ver=${this.version}` : '';
 		const server = await this.pool.find(async (url) => {
-			if (url.substring(0, 2) == '//') url = (document.location.protocol || 'http:') + url;
-			const loader = new ScriptLoader([
-				url.substring(0, 2) == '//' ? (document.location.protocol || 'http:') : '',
-				url,
-				'/socket.io/socket.io.js',
-				this.version ? `?ver=${this.version}` : ''
-			].join(''));
+			const loader = new ScriptLoader(`${url}/socket.io/socket.io.js${query}`);
 			try {
 				await loader.load();
 				if (!window.io) throw new Error("script did not load window.io");
