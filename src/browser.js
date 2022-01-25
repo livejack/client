@@ -2,8 +2,9 @@
 import AsyncPool from "./async-pool.js";
 import ScriptLoader from "./script-loader.js";
 
-export class LiveJack extends EventTarget {
+export class LiveJack {
 	#incident = false;
+	#emitter = document.createElement('p');
 
 	async init({ servers, namespace, version }) {
 		if (!servers || servers.length == 0) throw new Error("missing servers");
@@ -70,7 +71,7 @@ export class LiveJack extends EventTarget {
 	join(room, mtime, listener = null) {
 		this.rooms[room] = mtime;
 		if (listener) {
-			this.addEventListener(room, listener, false);
+			this.#emitter.addEventListener(room, listener, false);
 		}
 		if (this.io.connected) {
 			this.io.emit('join', { room, mtime });
@@ -90,7 +91,7 @@ export class LiveJack extends EventTarget {
 			cancelable: true,
 			detail: data
 		});
-		this.dispatchEvent(e);
+		this.emitter.dispatchEvent(e);
 	}
 
 }
