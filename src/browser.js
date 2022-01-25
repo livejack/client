@@ -40,12 +40,12 @@ export class LiveJack {
 			});
 			io.on('disconnect', (e) => {
 				this.#incident = true;
-				this.emit('ioerror', { message: 'disconnect' });
+				this.error('disconnect');
 			});
 			io.on('connect', (e) => {
 				if (this.#incident) {
 					this.#incident = false;
-					this.emit('ioerror', { message: 'reconnect' });
+					this.error('reconnect');
 				}
 			});
 			io.on('message', (data) => this.emit(data.room || data.key, data));
@@ -62,7 +62,7 @@ export class LiveJack {
 				if (!window.io) throw new Error("script did not load window.io");
 			} catch (err) {
 				this.#incident = true;
-				this.emit('ioerror', { message: 'offline' });
+				this.error('offline');
 				throw err;
 			}
 		});
@@ -92,6 +92,9 @@ export class LiveJack {
 			detail: data
 		});
 		this.emitter.dispatchEvent(e);
+	}
+	error(type) {
+		console.info(type);
 	}
 
 }
