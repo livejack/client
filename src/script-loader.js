@@ -1,6 +1,7 @@
-export default class ScriptLoader {
-	constructor(url) {
+class Loader {
+	constructor(url, attrs) {
 		this.url = url;
+		this.attrs = attrs;
 	}
 	async load() {
 		return new Promise((resolve, reject) => {
@@ -8,6 +9,7 @@ export default class ScriptLoader {
 			this.reject = reject;
 			const node = document.createElement('script');
 			node.src = this.url;
+			for (const key in this.attrs) node.setAttribute(key, this.attrs[key]);
 			node.async = true;
 			node.addEventListener('load', this, false);
 			node.addEventListener('error', this, false);
@@ -29,4 +31,9 @@ export default class ScriptLoader {
 		e.target.removeEventListener('load', this, false);
 		e.target.removeEventListener('error', this, false);
 	}
+}
+
+export default async function(url, attrs) {
+	const inst = new Loader(url, attrs);
+	return inst.load();
 }

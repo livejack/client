@@ -2,6 +2,8 @@
 import AsyncPool from "./async-pool.js";
 import ScriptLoader from "./script-loader.js";
 
+export { ScriptLoader };
+
 export class LiveJack {
 	#incident = false;
 	#emitter = document.createElement('p');
@@ -56,9 +58,8 @@ export class LiveJack {
 	async load() {
 		const query = this.version ? `?ver=${this.version}` : '';
 		const server = await this.pool.find(async (url) => {
-			const loader = new ScriptLoader(`${url}/socket.io/socket.io.js${query}`);
 			try {
-				await loader.load();
+				await ScriptLoader(`${url}/socket.io/socket.io.js${query}`);
 				if (!window.io) throw new Error("script did not load window.io");
 			} catch (err) {
 				this.#incident = true;
